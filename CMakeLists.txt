@@ -15,12 +15,12 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 
 # Manually set Python paths
-# set(Python_EXECUTABLE "C:/Users/jerry/AppData/Local/Microsoft/WindowsApps/python3.12.exe")
-set(Python_EXECUTABLE "F:/Smode Community/python/python.exe")
-# set(Python_INCLUDE_DIRS "C:/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.12_3.12.1264.0_x64__qbz5n2kfra8p0/include")
-set(Python_INCLUDE_DIRS "F:/Smode Community/python/DLLS/oui") # had to install missing python headers from site-packages
-# set(Python_LIBRARIES "C:/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.12_3.12.1264.0_x64__qbz5n2kfra8p0/libs/python312.lib")
-set(Python_LIBRARIES "F:/Smode Community/python/Libs")
+set(Python_EXECUTABLE "C:/Users/jerry/AppData/Local/Microsoft/WindowsApps/python3.12.exe")
+# set(Python_EXECUTABLE "F:/Smode Community/python/python.exe")
+set(Python_INCLUDE_DIRS "C:/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.12_3.12.1264.0_x64__qbz5n2kfra8p0/include")
+# set(Python_INCLUDE_DIRS "F:/Smode Community/python/DLLS/oui") # had to install missing python headers from site-packages
+set(Python_LIBRARIES "C:/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.12_3.12.1264.0_x64__qbz5n2kfra8p0/libs/python312.lib")
+# set(Python_LIBRARIES "F:/Smode Community/python/python37.dll")
 
 # Pass these variables to CMake
 set(Python3_EXECUTABLE ${Python_EXECUTABLE})
