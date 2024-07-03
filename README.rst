@@ -11,7 +11,12 @@ You can folow the `test plan <https://github.com/Ableton/link/blob/master/TEST-P
 
 Compile
 -------
-//TODO
+```
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
 
 License
 -------
