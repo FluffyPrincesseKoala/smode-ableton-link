@@ -4,19 +4,18 @@ import asyncio
 import sys
 
 # Add the path to the directory containing the compiled extension module
-sys.path.append('../build/Debug')
+sys.path.append('F:/AbletonDev/smode-ableton-link/build/Release')
 
 # Now you can import your module as if it was installed in the standard library
-import aalink
+import smodeLink
 
 # CLI modules
 import keyboard
-import aioconsole
 
 class LinkHut:
     def __init__(self):
         self.loop = asyncio.get_event_loop()  # Get the current asyncio event loop
-        self.link = aalink.Link(120.0, self.loop)  # Initialize with a tempo of 120 BPM and the current event loop
+        self.link = smodeLink.Link(120.0, self.loop)  # Initialize with a tempo of 120 BPM and the current event loop
         self.link.enabled = False  # Enable Link by default
         self.running = True
         self.refresh_rate = 0.1  # Refresh rate in seconds for the status update

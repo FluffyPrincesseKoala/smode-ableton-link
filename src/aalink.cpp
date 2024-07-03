@@ -11,7 +11,8 @@
 
 namespace py = pybind11;
 
-struct SchedulerSyncEvent {
+struct SchedulerSyncEvent
+{
     py::object future;
 
     double beat;
@@ -20,12 +21,14 @@ struct SchedulerSyncEvent {
     double link_beat;
 };
 
-static double next_link_beat(double current_beat, double sync_beat, double offset, double origin) {
+static double next_link_beat(double current_beat, double sync_beat, double offset, double origin)
+{
     double next_beat;
     double i;
 
     // return current_beat if evenly divisible by sync_beat
-    if (modf(current_beat / sync_beat, &i) == 0) {
+    if (modf(current_beat / sync_beat, &i) == 0)
+    {
         return current_beat;
     }
 
@@ -33,47 +36,57 @@ static double next_link_beat(double current_beat, double sync_beat, double offse
     next_beat = next_beat * sync_beat + origin;
     next_beat = next_beat + offset;
 
-    while (next_beat <= current_beat) {
+    while (next_beat <= current_beat)
+    {
         next_beat += sync_beat;
     }
 
     return std::max(next_beat, 0.0);
 }
 
-static void set_future_result(py::object future, double link_beat) {
+static void set_future_result(py::object future, double link_beat)
+{
     py::gil_scoped_acquire acquire;
 
     bool done = py::cast<bool>(future.attr("done")());
 
-    if (!done) {
+    if (!done)
+    {
         auto set_result = future.attr("set_result");
         set_result(link_beat);
     }
 }
 
-struct Scheduler {
-    Scheduler(ableton::Link& link, py::object loop) : m_link(link), m_loop(loop) {
+struct Scheduler
+{
+    Scheduler(ableton::Link &link, py::object loop) : m_link(link), m_loop(loop)
+    {
         start();
     }
 
     ~Scheduler() { stop(); }
 
-    void start() {
+    void start()
+    {
         m_stop_thread = false;
         m_thread = std::thread(&Scheduler::run, this);
     }
 
-    void stop() {
-        if (m_thread.joinable()) {
+    void stop()
+    {
+        if (m_thread.joinable())
+        {
             m_stop_thread = true;
             m_thread.join();
         }
     }
 
-    void run() {
+    void run()
+    {
         using namespace std::chrono_literals;
 
-        while (true) {
+        while (true)
+        {
             auto link_state = m_link.captureAppSessionState();
 
             auto link_time = m_link.clock().micros();
@@ -84,26 +97,32 @@ struct Scheduler {
 
             m_events_mutex.lock();
 
-            for (auto it = m_events.begin(); it != m_events.end();) {
-                if (link_beat > it->link_beat) {
+            for (auto it = m_events.begin(); it != m_events.end();)
+            {
+                if (link_beat > it->link_beat)
+                {
                     py::gil_scoped_acquire acquire;
 
                     bool loop_is_running = py::cast<bool>(m_loop.attr("is_running")());
 
-                    if (loop_is_running) {
+                    if (loop_is_running)
+                    {
                         auto loop_call_soon_threadsafe = m_loop.attr("call_soon_threadsafe");
                         loop_call_soon_threadsafe(py::cpp_function(&set_future_result), it->future, it->link_beat);
                     }
 
                     it = m_events.erase(it);
-                } else {
+                }
+                else
+                {
                     ++it;
                 }
             }
 
             m_events_mutex.unlock();
 
-            if (m_stop_thread) {
+            if (m_stop_thread)
+            {
                 break;
             }
 
@@ -111,7 +130,8 @@ struct Scheduler {
         }
     }
 
-    void schedule_sync(py::object future, double beat, double offset, double origin) {
+    void schedule_sync(py::object future, double beat, double offset, double origin)
+    {
         SchedulerSyncEvent event = {
             .future = future,
             .beat = beat,
@@ -128,10 +148,12 @@ struct Scheduler {
         m_events_mutex.unlock();
     }
 
-    void reschedule_sync_events(double link_beat) {
+    void reschedule_sync_events(double link_beat)
+    {
         m_events_mutex.lock();
 
-        for (auto& event : m_events) {
+        for (auto &event : m_events)
+        {
             event.link_beat = next_link_beat(link_beat, event.beat, event.offset, event.origin);
         }
 
@@ -150,79 +172,95 @@ struct Scheduler {
     std::atomic<double> m_link_time{0};
     std::atomic<double> m_link_quantum{1};
 
-    ableton::Link& m_link;
+    ableton::Link &m_link;
     py::object m_loop;
 };
 
-struct Link {
+struct Link
+{
     Link(double bpm, py::object loop)
         : m_link(bpm), m_loop(loop), m_scheduler(m_link, m_loop) {}
 
-    std::size_t num_peers() {
+    std::size_t num_peers()
+    {
         return m_link.numPeers();
     }
 
-    double beat() {
+    double beat()
+    {
         auto link_state = m_link.captureAppSessionState();
         return link_state.beatAtTime(m_link.clock().micros(), m_scheduler.m_link_quantum);
     }
 
-    double phase() {
+    double phase()
+    {
         auto link_state = m_link.captureAppSessionState();
         return link_state.phaseAtTime(m_link.clock().micros(), m_scheduler.m_link_quantum);
     }
 
-    std::chrono::microseconds time() {
+    std::chrono::microseconds time()
+    {
         return m_link.clock().micros();
     }
 
-    double quantum() {
+    double quantum()
+    {
         return m_scheduler.m_link_quantum;
     }
 
-    void set_quantum(double quantum) {
+    void set_quantum(double quantum)
+    {
         m_scheduler.m_link_quantum = quantum;
     }
 
-    bool enabled() {
+    bool enabled()
+    {
         return m_link.isEnabled();
     }
 
-    void set_enabled(bool enabled) {
+    void set_enabled(bool enabled)
+    {
         m_link.enable(enabled);
     }
 
-    bool start_stop_sync_enabled() {
+    bool start_stop_sync_enabled()
+    {
         return m_link.isStartStopSyncEnabled();
     }
 
-    void set_start_stop_sync_enabled(bool enabled) {
+    void set_start_stop_sync_enabled(bool enabled)
+    {
         m_link.enableStartStopSync(enabled);
     }
 
-    double tempo() {
+    double tempo()
+    {
         auto link_state = m_link.captureAppSessionState();
         return link_state.tempo();
     }
 
-    void set_tempo(double tempo) {
+    void set_tempo(double tempo)
+    {
         auto link_state = m_link.captureAppSessionState();
         link_state.setTempo(tempo, m_link.clock().micros());
         m_link.commitAppSessionState(link_state);
     }
 
-    bool playing() {
+    bool playing()
+    {
         auto link_state = m_link.captureAppSessionState();
         return link_state.isPlaying();
     }
 
-    void set_playing(bool playing) {
+    void set_playing(bool playing)
+    {
         auto link_state = m_link.captureAppSessionState();
         link_state.setIsPlaying(playing, m_link.clock().micros());
         m_link.commitAppSessionState(link_state);
     }
 
-    void request_beat(double beat) {
+    void request_beat(double beat)
+    {
         auto link_state = m_link.captureAppSessionState();
         link_state.requestBeatAtTime(beat, m_link.clock().micros(), m_scheduler.m_link_quantum);
         m_link.commitAppSessionState(link_state);
@@ -230,7 +268,8 @@ struct Link {
         m_scheduler.reschedule_sync_events(beat);
     }
 
-    void force_beat(double beat) {
+    void force_beat(double beat)
+    {
         auto link_state = m_link.captureAppSessionState();
         link_state.forceBeatAtTime(beat, m_link.clock().micros(), m_scheduler.m_link_quantum);
         m_link.commitAppSessionState(link_state);
@@ -238,7 +277,8 @@ struct Link {
         m_scheduler.reschedule_sync_events(beat);
     }
 
-    void request_beat_at_start_playing_time(double beat) {
+    void request_beat_at_start_playing_time(double beat)
+    {
         auto link_state = m_link.captureAppSessionState();
         link_state.requestBeatAtStartPlayingTime(beat, m_scheduler.m_link_quantum);
         m_link.commitAppSessionState(link_state);
@@ -246,7 +286,8 @@ struct Link {
         m_scheduler.reschedule_sync_events(beat);
     }
 
-    void set_is_playing_and_request_beat_at_time(bool playing, std::chrono::microseconds time, double beat) {
+    void set_is_playing_and_request_beat_at_time(bool playing, std::chrono::microseconds time, double beat)
+    {
         auto link_state = m_link.captureAppSessionState();
         link_state.setIsPlayingAndRequestBeatAtTime(playing, time, beat, m_scheduler.m_link_quantum);
         m_link.commitAppSessionState(link_state);
@@ -254,43 +295,47 @@ struct Link {
         m_scheduler.reschedule_sync_events(beat);
     }
 
-    void set_num_peers_callback(py::function callback) {
-        m_link.setNumPeersCallback([this, callback](std::size_t num_peers) {
+    void set_num_peers_callback(py::function callback)
+    {
+        m_link.setNumPeersCallback([this, callback](std::size_t num_peers)
+                                   {
             // ensure the callback isn't called when the runtime is finalizing
             if (!_Py_IsFinalizing()) {
                 py::gil_scoped_acquire acquire;
 
                 auto loop_call_soon_threadsafe = this->m_loop.attr("call_soon_threadsafe");
                 loop_call_soon_threadsafe(callback, num_peers);
-            }
-        });
+            } });
     }
 
-    void set_tempo_callback(py::function callback) {
-        m_link.setTempoCallback([this, callback](double tempo) {
+    void set_tempo_callback(py::function callback)
+    {
+        m_link.setTempoCallback([this, callback](double tempo)
+                                {
             // ensure the callback isn't called when the runtime is finalizing
             if (!_Py_IsFinalizing()) {
                 py::gil_scoped_acquire acquire;
 
                 auto loop_call_soon_threadsafe = this->m_loop.attr("call_soon_threadsafe");
                 loop_call_soon_threadsafe(callback, tempo);
-            }
-        });
+            } });
     }
 
-    void set_start_stop_callback(py::function callback) {
-        m_link.setStartStopCallback([this, callback](bool playing) {
+    void set_start_stop_callback(py::function callback)
+    {
+        m_link.setStartStopCallback([this, callback](bool playing)
+                                    {
             // ensure the callback isn't called when the runtime is finalizing
             if (!_Py_IsFinalizing()) {
                 py::gil_scoped_acquire acquire;
 
                 auto loop_call_soon_threadsafe = this->m_loop.attr("call_soon_threadsafe");
                 loop_call_soon_threadsafe(callback, playing);
-            }
-        });
+            } });
     }
 
-    py::object sync(double beat, double offset, double origin) {
+    py::object sync(double beat, double offset, double origin)
+    {
         auto future = m_loop.attr("create_future")();
         m_scheduler.schedule_sync(future, beat, offset, origin);
         return future;
@@ -301,7 +346,8 @@ struct Link {
     Scheduler m_scheduler;
 };
 
-PYBIND11_MODULE(aalink, m) {
+PYBIND11_MODULE(smodeLink, m)
+{
     py::class_<Link>(m, "Link")
         .def(py::init<double, py::object>(), py::arg("bpm"), py::arg("loop"))
         .def_property_readonly("num_peers", &Link::num_peers)

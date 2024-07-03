@@ -3,13 +3,13 @@ requires = ["scikit-build-core >=0.4.3"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "aalink"
-version = "0.0.6"
-description = "Async Python interface for Ableton Link"
-readme = "README.rst"
-requires-python = ">=3.8"
+name = "smode-ableton-link"
+version = "0.0.1"
+description = "Async Python interface for integrate ableton link to smode comunity edition"
+readme = "README.md"
+requires-python = ">=3.7.5"
 authors = [
-    {name = "Artem Popov", email = "art@artfwo.net"}
+    {name = "fpk", email = "cyrilfpk@gmail.com"}
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -23,7 +23,7 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/artfwo/aalink"
+Homepage = "https://github.com/FluffyPrincesseKoala/smode-ableton-link/tree/main"
 
 [tool.cibuildwheel]
 build-verbosity = 1
