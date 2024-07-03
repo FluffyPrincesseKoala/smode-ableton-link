@@ -11,9 +11,14 @@ You can folow the [test plan](https://github.com/Ableton/link/blob/master/TEST-P
 
 Compile
 -------
-`
+```
 mkdir build
 cd build
 cmake ..
-cmake --build .
-`
+cmake --build . --config Release
+```
+then you can copy `smodeLink.cp37-win_amd64.pyd` into smode python directory
+```
+# Now you can import your module as if it was installed in the standard library
+import smodeLink
+```
