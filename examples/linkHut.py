@@ -4,7 +4,7 @@ import asyncio
 import sys
 
 # Add the path to the directory containing the compiled extension module
-sys.path.append('F:\\AbletonDev\\aalink\\build\\Debug')
+sys.path.append('../build/Debug')
 
 # Now you can import your module as if it was installed in the standard library
 import aalink
