@@ -1,7 +1,7 @@
 
 Goal
 -------
-Him to integrate ableton link to smode using pybind to access cpp mapped function from python.
+Aims to integrate ableton link to smode using pybind to access cpp mapped function from python.
 This repo is a fork of [aalink](https://github.com/artfwo/aalink) for python 3.7.5 (aalink is a bit wonky under python 3.8)
 
 Test
